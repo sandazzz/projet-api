@@ -33,7 +33,8 @@ export async function publishAdsHandler(
 
 export async function editAdsHandler(
   request: CustomFastifyRequest,
-  reply: FastifyReply) {
+  reply: FastifyReply
+) {
   try {
     const userId = Number(request.userId);
 
@@ -42,19 +43,20 @@ export async function editAdsHandler(
     }
 
     const { adId, title, description, imageUrl } = request.body as {
-      adId: number,
-      title: string,
-      description: string,
-      imageUrl: string,
+      adId: number;
+      title: string;
+      description: string;
+      imageUrl: string;
     };
 
     if (!adId || !title || !description) {
       return reply.status(400).send({
-        error: "Missing required fields: adId, title, and description are required",
+        error:
+          "Missing required fields: adId, title, and description are required",
       });
     }
 
-    const ad = await isAdExist(adId)
+    const ad = await isAdExist(adId);
 
     if (!ad) {
       return reply.status(404).send({ error: "Ad not found" });
@@ -98,7 +100,7 @@ export async function deleteAdHandler(
     }
 
     // Vérifier si l'annonce existe et appartient à l'utilisateur
-    const ad = await isAdExist(adId)
+    const ad = await isAdExist(adId);
 
     if (!ad) {
       return reply.status(404).send({ error: "Ad not found" });
@@ -111,7 +113,7 @@ export async function deleteAdHandler(
     }
 
     // Supprimer l'annonce
-    await deleteAd(adId)
+    await deleteAd(adId);
 
     return reply.status(200).send({ message: "Ad deleted successfully" });
   } catch (error) {
@@ -141,7 +143,9 @@ export async function getAdsHandler(
     return reply.status(200).send(ads);
   } catch (error) {
     console.error("Error fetching ads:", error);
-    return reply.status(500).send({ error: "An error occurred while fetching ads" });
+    return reply
+      .status(500)
+      .send({ error: "An error occurred while fetching ads" });
   }
 }
 
@@ -163,6 +167,8 @@ export async function getAdDetailsHandler(
     return reply.status(200).send(ad);
   } catch (error) {
     console.error("Error fetching ad details:", error);
-    return reply.status(500).send({ error: "An error occurred while fetching ad details" });
+    return reply
+      .status(500)
+      .send({ error: "An error occurred while fetching ad details" });
   }
 }
