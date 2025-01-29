@@ -1,4 +1,4 @@
-import { FastifyReply } from "fastify";
+import { FastifyInstance, FastifyReply } from "fastify";
 import { CustomFastifyRequest } from "src/types/request.type";
 import { createNewAd, deleteAd, isAdExist, updateAd } from "./ads.services";
 import prisma from "@lib/prisma";
@@ -54,7 +54,6 @@ export async function editAdsHandler(
       });
     }
 
-    // Vérifier si l'annonce existe et appartient à l'utilisateur
     const ad = await isAdExist(adId)
 
     if (!ad) {
@@ -120,5 +119,50 @@ export async function deleteAdHandler(
     return reply.status(500).send({
       error: "An error occurred while deleting the ad",
     });
+  }
+}
+
+export async function getAdsHandler(
+  request: CustomFastifyRequest,
+  reply: FastifyReply,
+  fastify: FastifyInstance
+) {
+  try {
+    const ads = await prisma.ad.findMany({
+      select: {
+        id: true,
+        title: true,
+        description: true,
+      },
+    });
+
+    await fastify.cache.set("ads-list", ads, 60 * 1000); // 60 secondes
+
+    return reply.status(200).send(ads);
+  } catch (error) {
+    console.error("Error fetching ads:", error);
+    return reply.status(500).send({ error: "An error occurred while fetching ads" });
+  }
+}
+
+export async function getAdDetailsHandler(
+  request: CustomFastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const adId = Number((request.params as { id: string }).id);
+
+    const ad = await prisma.ad.findUnique({
+      where: { id: adId },
+    });
+
+    if (!ad) {
+      return reply.status(404).send({ error: "Ad not found" });
+    }
+
+    return reply.status(200).send(ad);
+  } catch (error) {
+    console.error("Error fetching ad details:", error);
+    return reply.status(500).send({ error: "An error occurred while fetching ad details" });
   }
 }

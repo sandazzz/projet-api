@@ -1,12 +1,31 @@
 import { FastifyInstance } from "fastify";
 import authMiddleware from "src/middleware/auth.middleware";
-import { deleteAdHandler, editAdsHandler, publishAdsHandler } from "./ads.controllers";
-import prisma from "@lib/prisma";
+import { deleteAdHandler, editAdsHandler, publishAdsHandler, getAdsHandler, getAdDetailsHandler } from "./ads.controllers";
+import fastifyRateLimit from "@fastify/rate-limit";
 
 export default async function adsRoutes(fastify: FastifyInstance) {
+
+  fastify.register(fastifyRateLimit, {
+    global: false
+  });
+
   fastify.post(
     "/ads/publish",
-    { preHandler: [authMiddleware.isAuthenticated, authMiddleware.isExist] },
+    {
+      preHandler: [
+        authMiddleware.isAuthenticated,
+        authMiddleware.isExist,
+        fastify.rateLimit({
+          max: 10,
+          timeWindow: "1 second",
+          errorResponseBuilder: (req, context) => ({
+            statusCode: 429,
+            error: "Too Many Requests",
+            message: `You have exceeded the limit of ${context.max} requests per minute.`,
+          }),
+        }),
+      ]
+    },
     publishAdsHandler
   );
 
@@ -22,40 +41,10 @@ export default async function adsRoutes(fastify: FastifyInstance) {
 
   fastify.get("/ads/list",
     { preHandler: [authMiddleware.isAuthenticated, authMiddleware.isExist] },
-    async (request, reply) => {
-      try {
-        const ads = await prisma.ad.findMany({
-          select: {
-            id: true,
-            title: true,
-            description: true,
-          },
-        });
-        return reply.status(200).send(ads);
-      } catch (error) {
-        console.error("Error fetching ads:", error);
-        return reply.status(500).send({ error: "An error occurred while fetching ads" });
-      }
-    });
+    getAdsHandler(fastify));
 
   fastify.get("/ads/details/:id",
     { preHandler: [authMiddleware.isAuthenticated, authMiddleware.isExist] },
-    async (request, reply) => {
-      try {
-        const adId = Number((request.params as { id: string }).id);
-
-        const ad = await prisma.ad.findUnique({
-          where: { id: adId },
-        });
-
-        if (!ad) {
-          return reply.status(404).send({ error: "Ad not found" });
-        }
-
-        return reply.status(200).send(ad);
-      } catch (error) {
-        console.error("Error fetching ad details:", error);
-        return reply.status(500).send({ error: "An error occurred while fetching ad details" });
-      }
-    });
+    getAdDetailsHandler
+  )
 }
