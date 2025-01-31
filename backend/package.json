@@ -22,8 +22,11 @@
   },
   "dependencies": {
     "@fastify/caching": "^9.0.3",
+    "@fastify/cors": "^10.0.2",
+    "@fastify/oauth2": "^8.1.1",
     "@fastify/rate-limit": "^10.2.2",
     "@prisma/client": "6.1.0",
+    "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.0",

@@ -20,7 +20,6 @@ export async function loginHandler(
       return;
     }
 
-    // Appel à la fonction pour créer l'utilisateur
     const user = await authenticateUser(email, password);
 
     if (!user) {
@@ -35,7 +34,10 @@ export async function loginHandler(
     );
 
     // Réponse avec succès
-    reply.status(201).send({ token });
+    reply
+      .header("x-access-token", token) // Définition du header
+      .status(201)
+      .send({ message: "Login successful", token });
   } catch (error) {
     console.error("Error in authRoutes:", error);
     reply.status(500).send({ error: "Something went wrong" });

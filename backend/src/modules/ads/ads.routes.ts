@@ -1,5 +1,7 @@
 import { FastifyInstance } from "fastify";
-import fastifyRateLimit from "@fastify/rate-limit";
+import { CustomFastifyRequest } from "src/types/request.type";
+
+import rateLimit, { FastifyRateLimitOptions } from "@fastify/rate-limit";
 import fastifyCaching from "@fastify/caching";
 import authMiddleware from "src/middleware/auth.middleware";
 import {
@@ -11,13 +13,30 @@ import {
 } from "./ads.controllers";
 
 export default async function adsRoutes(fastify: FastifyInstance) {
-  fastify.register(fastifyRateLimit, {
+  
+  await fastify.register(rateLimit, {
     global: false,
   });
 
+  const rateLimitOptions: FastifyRateLimitOptions = {
+    max: 10,
+    timeWindow: "1 second",
+    errorResponseBuilder: (
+      req: CustomFastifyRequest,
+      context: {
+        max: number;
+        timeWindow: string;
+      }
+    ) => ({
+      statusCode: 429,
+      error: "Too Many Requests",
+      message: `You have exceeded the limit of ${context.max} requests per second.`,
+    }),
+  };
+
   fastify.register(fastifyCaching, {
-    privacy: "public", // ou 'private'
-    expiresIn: 60 * 1000, // Cache 60 secondes
+    privacy: "public",
+    expiresIn: 60 * 1000,
   });
 
   fastify.post(
@@ -26,15 +45,7 @@ export default async function adsRoutes(fastify: FastifyInstance) {
       preHandler: [
         authMiddleware.isAuthenticated,
         authMiddleware.isExist,
-        fastify.rateLimit({
-          max: 10,
-          timeWindow: "1 second",
-          errorResponseBuilder: (req, context) => ({
-            statusCode: 429,
-            error: "Too Many Requests",
-            message: `You have exceeded the limit of ${context.max} requests per minute.`,
-          }),
-        }),
+        fastify.rateLimit(rateLimitOptions),
       ],
     },
     publishAdsHandler

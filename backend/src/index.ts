@@ -1,11 +1,19 @@
 // Import the framework and instantiate it
 import Fastify from "fastify";
+import cors from "@fastify/cors";
+
 import userRoutes from "./modules/users/users.routes";
 import authRoutes from "./modules/auth/auth.routes";
 import adsRoutes from "./modules/ads/ads.routes";
 
 const fastify = Fastify({
   logger: true,
+});
+
+fastify.register(cors, {
+  origin: "http://localhost:3001",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
 });
 
 fastify.register(userRoutes, { prefix: "/api" });
