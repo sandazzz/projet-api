@@ -4,15 +4,15 @@ import cors from "@fastify/cors";
 import fastifyCookie from "@fastify/cookie";
 import fastifyOauth2 from "@fastify/oauth2";
 
-import userRoutes from "./src/modules/users/users.routes";
-import authRoutes from "./src/modules/auth/auth.routes";
-import adsRoutes from "./src/modules/ads/ads.routes";
+import userRoutes from "./modules/users/users.routes";
+import authRoutes from "./modules/auth/auth.routes";
+import adsRoutes from "./modules/ads/ads.routes";
 import {
   getGoogleUserInfo,
   findOrCreateUser,
   generateJWT,
   getGitHubUserInfo,
-} from "./src/modules/auth/auth.services";
+} from "./modules/auth/auth.services";
 
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
   throw new Error("Missing Google OAuth credentials in environment variables.");
