@@ -1,25 +1,38 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useAuth } from "@/composables/useAuth";
+
+const { token, logout } = useAuth();
+
+const handleLogout = async () => {
+  await logout();
+};
+</script>
 
 <template>
   <header
-    class="w-full bg-gray-800 px-6 py-4 flex items-center justify-between shadow-md"
+    class="sticky top-0 z-10 w-full bg-gray-900 px-4 py-2 flex flex-wrap items-center justify-between border-b border-gray-700"
   >
     <!-- Logo -->
-    <h1 class="text-2xl font-bold text-green-500">
-      <nuxt-link to="/" class="hover:text-green-400">BoiteAnnonces</nuxt-link>
+    <h1 class="text-xl font-semibold text-green-400">
+      <nuxt-link
+        to="/"
+        class="hover:text-green-300 transition-colors duration-200"
+      >
+        BoiteAnnonces
+      </nuxt-link>
     </h1>
 
-    <!-- Navigation -->
-    <nav class="flex items-center gap-4">
+    <!-- Navigation compacte et responsive -->
+    <nav class="flex flex-wrap items-center gap-3 sm:gap-5">
       <nuxt-link
         to="/login"
-        class="px-8 py-3 bg-gray-800 text-white font-semibold rounded-md shadow-lg hover:bg-gray-700 hover:shadow-xl transition-transform transform hover:scale-105"
+        class="px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white border border-gray-600 rounded-md hover:bg-gray-800 transition-all duration-200"
       >
         Connexion
       </nuxt-link>
       <nuxt-link
         to="/signup"
-        class="px-8 py-3 bg-green-500 text-gray-900 font-semibold rounded-md shadow-lg hover:bg-green-600 hover:shadow-xl transition-transform transform hover:scale-105"
+        class="px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-900 bg-green-500 border border-green-500 rounded-md hover:bg-green-600 transition-all duration-200"
       >
         Créer un compte
       </nuxt-link>
