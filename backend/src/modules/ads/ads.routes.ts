@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { CustomFastifyRequest } from "src/types/request.type";
+import { CustomFastifyRequest } from "src/types/custom-fastify-request";
 
 import rateLimit, { FastifyRateLimitOptions } from "@fastify/rate-limit";
 import fastifyCaching from "@fastify/caching";

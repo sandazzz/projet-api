@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply } from "fastify";
-import { CustomFastifyRequest } from "src/types/request.type";
+import { CustomFastifyRequest } from "src/types/custom-fastify-request";
 import { createNewAd, deleteAd, isAdExist, updateAd } from "./ads.services";
 import prisma from "@lib/prisma";
 
@@ -130,6 +130,23 @@ export async function getAdsHandler(
   fastify: FastifyInstance
 ) {
   try {
+    // Vérifier si les données sont en cache
+    const cachedData: any = await new Promise((resolve, reject) => {
+      fastify.cache.get("ads-list", (err, data) => {
+        if (err) {
+          console.error("Cache retrieval error:", err);
+          return reject(err);
+        }
+        resolve(data);
+      });
+    });
+
+    // Si les données sont en cache, on les retourne immédiatement
+    if (cachedData) {
+      console.log("Serving from cache");
+      return reply.status(200).send(cachedData.item);
+    }
+
     const ads = await prisma.ad.findMany({
       select: {
         id: true,
@@ -138,7 +155,15 @@ export async function getAdsHandler(
       },
     });
 
-    await fastify.cache.set("ads-list", ads, 60 * 1000); // 60 secondes
+    await new Promise((resolve, reject) => {
+      fastify.cache.set("ads-list", ads, 60 * 1000, (err) => {
+        if (err) {
+          console.error("Error setting cache:", err);
+          return reject(err);
+        }
+        resolve(null);
+      });
+    });
 
     return reply.status(200).send(ads);
   } catch (error) {

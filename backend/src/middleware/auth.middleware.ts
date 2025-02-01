@@ -1,7 +1,7 @@
 import { FastifyReply } from "fastify";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import prisma from "@lib/prisma";
-import { CustomFastifyRequest } from "src/types/request.type";
+import { CustomFastifyRequest } from "src/types/custom-fastify-request";
 
 export function isAuthenticated(
   request: CustomFastifyRequest,
@@ -14,25 +14,22 @@ export function isAuthenticated(
     if (!JWT_SECRET) {
       throw new Error("JWT_SECRET is not defined in the environment variables");
     }
-    const token = request.headers["x-access-token"];
+
+    // Récupérer le token depuis les cookies
+    const token = request.cookies.token;
 
     if (!token) {
       return reply.status(403).send({ message: "No token provided!" });
     }
 
-    if (Array.isArray(token)) {
-      throw new Error("Invalid token format: token should be a string");
-    }
-
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-    console.log(decoded);
+    console.log("Decoded token:", decoded);
 
     if (!decoded) {
       throw new Error("Invalid token");
     }
 
     request.userId = decoded.id;
-
     done();
   } catch (error) {
     reply.status(401).send({ error: "Unauthorized" });
@@ -48,7 +45,7 @@ export async function isExist(
     where: { id: id },
   });
 
-  console.log(user);
+  console.log("User found:", user);
 
   if (!user) {
     reply.status(403).send({ message: "User not found" });
