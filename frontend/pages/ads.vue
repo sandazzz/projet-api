@@ -1,25 +1,18 @@
 <script setup lang="ts">
-import { reactive, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
 
-const router = useRouter();
-
-const ads = reactive<{ title: string; description: string; image: string }[]>(
-  []
-);
-const messages = reactive({
-  error: "",
-});
-
-// État pour suivre quelles annonces sont étendues
-const expandedAds = reactive<{ [key: string]: boolean }>({});
+const ads = ref<{ title: string; description: string; image: string }[]>([]);
+const messages = ref({ error: "" });
+const expandedAds = ref<{ [key: string]: boolean }>({});
+const loading = ref(true);
 
 const toggleExpand = (title: string) => {
-  expandedAds[title] = !expandedAds[title];
+  expandedAds.value[title] = !expandedAds.value[title];
 };
 
 const fetchAds = async () => {
-  messages.error = "";
+  messages.value.error = "";
+  loading.value = true;
   try {
     const response = await $fetch<
       { title: string; description: string; image: string }[]
@@ -27,9 +20,11 @@ const fetchAds = async () => {
       method: "GET",
       credentials: "include",
     });
-    ads.splice(0, ads.length, ...response);
+    ads.value = response;
   } catch (error) {
-    messages.error = "Erreur lors de la récupération des annonces.";
+    messages.value.error = "Erreur lors de la récupération des annonces.";
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -51,26 +46,33 @@ onMounted(fetchAds);
         {{ messages.error }}
       </div>
 
+      <div v-if="loading" class="text-gray-400 text-center">
+        Chargement des annonces...
+      </div>
+
       <div
-        v-if="ads.length === 0 && !messages.error"
+        v-if="ads.length === 0 && !messages.error && !loading"
         class="text-gray-400 text-center"
       >
         Aucune annonce disponible pour le moment.
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" v-if="!loading">
         <div
-          v-for="ad in ads"
-          :key="ad.title"
+          v-for="(ad, index) in ads"
+          :key="index"
           class="p-5 bg-gray-900 rounded-lg shadow-lg border border-gray-700 hover:shadow-green-500/50 transition-all hover:scale-105 flex flex-col h-full"
         >
           <div class="flex-1">
             <h3 class="text-lg font-semibold text-white">{{ ad.title }}</h3>
-            <p
-              class="text-gray-400 mt-2 overflow-hidden"
-              :class="{ truncate: !expandedAds[ad.title] }"
-            >
+            <p v-show="expandedAds[ad.title]" class="text-gray-400 mt-2">
               {{ ad.description }}
+            </p>
+            <p
+              v-show="!expandedAds[ad.title]"
+              class="text-gray-400 mt-2 truncate"
+            >
+              {{ ad.description.substring(0, 150) }}...
             </p>
           </div>
 
@@ -82,7 +84,6 @@ onMounted(fetchAds);
               class="rounded-lg shadow-md max-w-full object-cover"
             />
 
-            <!-- Bouton "Voir plus" uniquement si la description est longue -->
             <button
               v-if="ad.description.length > 150"
               @click="toggleExpand(ad.title)"
