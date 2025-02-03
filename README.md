@@ -46,7 +46,7 @@ Assurez-vous que les variables d'environnement suivantes sont configurées :
     GITHUB_CLIENT_ID=
     GITHUB_CLIENT_SECRET=
     JWT_SECRET=
-    NODE_ENV=development
+    NODE_ENV=
     ```
 
 ## Lancement
