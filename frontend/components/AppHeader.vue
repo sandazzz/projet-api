@@ -1,41 +1,36 @@
 <script setup lang="ts">
-import { useAuth } from "@/composables/useAuth";
+import { ref } from 'vue'
+import LoginModal from '~/components/LoginModal.vue' // Assure-toi que le chemin est bon
 
-const { token, logout } = useAuth();
-
-const handleLogout = async () => {
-  await logout();
-};
+const showLoginModal = ref(false)
 </script>
 
 <template>
   <header
-    class="sticky top-0 z-10 w-full bg-gray-900 px-4 py-2 flex flex-wrap items-center justify-between border-b border-gray-700"
-  >
+    class="sticky top-0 z-10 w-full bg-gray-900 px-4 py-2 flex flex-wrap items-center justify-between border-b border-gray-700">
     <!-- Logo -->
     <h1 class="text-xl font-semibold text-green-400">
-      <nuxt-link
-        to="/"
-        class="hover:text-green-300 transition-colors duration-200"
-      >
+      <nuxt-link to="/" class="hover:text-green-300 transition-colors duration-200">
         BoiteAnnonces
       </nuxt-link>
     </h1>
 
-    <!-- Navigation compacte et responsive -->
+    <!-- Navigation -->
     <nav class="flex flex-wrap items-center gap-3 sm:gap-5">
-      <nuxt-link
-        to="/login"
-        class="px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white border border-gray-600 rounded-md hover:bg-gray-800 transition-all duration-200"
-      >
+      <!-- Bouton pour ouvrir la modale -->
+      <button @click="showLoginModal = true"
+        class="px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white border border-gray-600 rounded-md hover:bg-gray-800 transition-all duration-200">
         Connexion
-      </nuxt-link>
-      <nuxt-link
-        to="/signup"
-        class="px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-900 bg-green-500 border border-green-500 rounded-md hover:bg-green-600 transition-all duration-200"
-      >
+      </button>
+
+      <!-- Lien vers inscription -->
+      <nuxt-link to="/signup"
+        class="px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-900 bg-green-500 border border-green-500 rounded-md hover:bg-green-600 transition-all duration-200">
         Créer un compte
       </nuxt-link>
     </nav>
   </header>
+
+  <!-- Composant modale de connexion -->
+  <LoginModal :show="showLoginModal" @close="showLoginModal = false" />
 </template>
