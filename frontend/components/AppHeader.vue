@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import LoginModal from '~/components/LoginModal.vue' // Assure-toi que le chemin est bon
+import SignUpModal from '~/components/SignUpModal.vue'
 
-const showLoginModal = ref(false)
+const showLoginModal = ref<boolean>(false)
+const showSignUpModal = ref<boolean>(false)
 </script>
 
 <template>
@@ -24,13 +25,15 @@ const showLoginModal = ref(false)
       </button>
 
       <!-- Lien vers inscription -->
-      <nuxt-link to="/signup"
+      <button @click="showSignUpModal = true"
         class="px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-900 bg-green-500 border border-green-500 rounded-md hover:bg-green-600 transition-all duration-200">
         Créer un compte
-      </nuxt-link>
+      </button>
     </nav>
   </header>
 
-  <!-- Composant modale de connexion -->
+  <!-- Composant modale -->
   <LoginModal :show="showLoginModal" @close="showLoginModal = false" />
+  <SignUpModal :show="showSignUpModal" @close="showSignUpModal = false" />
+
 </template>

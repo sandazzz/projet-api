@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
 
 const ads = ref<{ title: string; description: string; image: string }[]>([]);
 
